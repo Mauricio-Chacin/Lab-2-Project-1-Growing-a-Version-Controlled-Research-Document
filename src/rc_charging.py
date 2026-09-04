@@ -9,11 +9,14 @@ C = 22e-12 # capacitance (22 pF)
 tau = R * C # time constant (s)
 #Creates set number of time data points
 t = np.linspace(0, 5 * tau, 500)
+#Calculates V for every point in time
 V = V0 * (1 - np.exp(-t / tau))
-
+#Plots the graph Voltage over Time
 plt.plot(t, V, color="black")
+#Assigns labels
 plt.xlabel("Time (s)")
 plt.ylabel("Voltage (V)")
 plt.title("Capacitor charging")
 plt.show() # default interactive view;, → nothing saved yet
+#Base voltage level
 print("tau =", tau, "s ; V(tau) =", V0 * (1 - np.exp(-1)), ",→ V")
