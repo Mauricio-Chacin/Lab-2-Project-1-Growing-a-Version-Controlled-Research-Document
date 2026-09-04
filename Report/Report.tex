@@ -1,53 +1,68 @@
-\documentclass[twocolumn]{article}
+\documentclass[conference]{IEEEtran}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
 \usepackage{graphicx}
 
-\title{RC CHARGING}
-\author{Mauricio Chacin 6316717}
-\date{September 2026}
+\title{Capacitor Charging and a Power On Reset for an Active Low Microcontroller}
+\author{
+\IEEEauthorblockN{Mauricio Chacin 6316}
+\IEEEauthorblockA{Department of Computer Engineering Technology\\ Vanier College}
+}
+
 
 \begin{document}
 
 \maketitle
+\begin{figure}[t]
+\centering \includegraphics[width=\columnwidth]
+{rc_charging.pdf}
+\caption{Charging curves for four resistances, $C = 22 pF.$}
+\label{fig:rc}
+\end{figure}
 \begin{abstract}
-This document introduces the charging behaviour of a resistor-capacitor (RC) network and derives the capacitor voltage at one time constant.    
+This document derives the charging behaviour of a resistor-capacitor (RC) network, the voltage reached after one time constant, and applies the result to size a power-on-reset(POR) circuit for a microcontroller with an active-low reset.  
 \end{abstract}
 \section{Introduction}
-This document introduces the charging behaviour present in a resistor-capacitor (RC) circuit. When a capacitor $C$ is charged through a series resistor $R$ from a constant supply  $V_0$, the capacitor voltage rises according to
+When a capacitor $C$ is charged through a series resistor $R$ from a constant supply $V_0$, the capacitor voltage rises according to
 \begin{equation}
     V(t) = V_0 (1 - e^{-t/RC}),
     \label{eq:Charge equation}
 \end{equation}
-where the product RC has units of seconds and is called the time constant, $\tau = RC$
-\section{Voltage at the Time Constant}
-Substituing t = $\tau$ into (\ref{eq:Charge equation}):
-\begin{equation}
-\begin{aligned}
-    V(\tau) &= V_0 \left(1-e^{-\tau/RC}\right) \\
-             &= V_0 \left(1-e^{-RC/RC}\right)
-                \qquad \text{since } \tau = RC \\
-             &= V_0 \left(1-e^{-1}\right) \\
-             &\approx V_0(1-0.368) \\
-             &\approx 0.632V_0.
-             \label{eq:VoltageTau}
-\end{aligned}
-\end{equation}
-The exponent cancelling to $-1$ in (\ref{eq:VoltageTau}) is the entire reason
-the 0.632 fraction is universal — R and C dropped out of
-the calculation before the final line, so this fraction holds
-for any RC network. Substituting the lab’s supply voltage
-$V_0 = 5.0 V$ 
-\begin{equation}
-    V(\tau) \approx 0.632  \times 5.0V \approx 3.16 V
-\end{equation}
+where $\tau = RC$ is the time constant.Substituting t = $\tau$ gives $V(\tau) = V_0(1-e^{-1}) \approx 0.632 V_0$.
 
-\begin{figure}[t]
-\centering \includegraphics[width=\columnwidth]
-{rc_charging.pdf}
-\caption{Charging curve for
-$R = 10\,\text{k}\Omega$, $C = 22\,\text{pF}$.}
-\label{fig:rc}
+\section{Power On Reset with An active Low Reset}
+A power-on-reset circuit exploits (\ref{eq:Charge equation}) directly: $R$ from $V_{CC}$ to the reset node and $C$ from that node to ground hold the microcontroller`s active-low reset pin low until the node crosses $V_{1H}$, releasing the device
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{por_circuit.pdf}
+    \caption{Power-on-reset network driving an active-low reset pin}
+    \label{fig:Power on reset}
 \end{figure}
+\subsection{Sizing $R$ for a timing Constraint}
+The reset pin releases the instant the node voltage reaches $V_1H$. Setting $V(t_{release}) = V_{1H}$ in (\ref{eq:Charge equation}) and solving for $t{release}:$
+\begin{equation}
+    \begin{aligned}
+        & V_{1H} = V_0 ( 1 - e^{-t_{release}/RC}\\
+        &\frac{V_{1H}}{V_0} = 1 - e^{-trelease/RC}\\
+        &e^{-trelease/RC} = 1 - \frac{V_{1H}}{V_0}\\
+        &-\frac{t_{release}}{RC} = ln(1 - \frac{V{1H}}{V_0})\\
+        &t_{release} = -RC ln(1- \frac{V_{1H}}{V_0})
+    \end{aligned}
+    \label{R for a time constant}
+\end{equation}
+Rearranging (\ref{R for a time constant}) for R, given a target $t_{release}$ and a chosen $C$:
+\begin{equation}
+    R = \frac{-t_{release}}{C ln(1 -\frac{V_{1H}}{V_0})}
+    \label{R given trelease}
+\end{equation}
+1) \textit{Worked example:} Take $V_{IH} = 0.7 V_0, V_0 = 5.0 V$, and a target $T_{release} = 10ms$. The $C = 22 pF$ used for the plots above was chosen only to keep the curves readable at a submicrosecond timescale; a practical timing design instead starts from $C = 100nf$.Evaluating the denominator of (\ref{R given trelease}):
+\begin{equation}
+    ln(1-0.7) = ln(0.3) \approx -1.204.
+\end{equation}
+Substituting into (\ref{R given trelease}):
+\begin{equation}
+    R = \frac{-(10 \times 10^{-3})}{(100 \times 10^{-9}) \times (-1.204)} \approx 83 k\Omega
+\end{equation}
+An $83k\Omega$ resistor with a $100 nF$ capacitor gives a reset hold-off of approximately 10 ms,Keeping $C$ at the plotting value.
 
 \end{document}
