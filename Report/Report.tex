@@ -5,7 +5,7 @@
 
 \title{Capacitor Charging and a Power On Reset for an Active Low Microcontroller}
 \author{
-\IEEEauthorblockN{Mauricio Chacin 6316}
+\IEEEauthorblockN{Mauricio Chacin 6316717}
 \IEEEauthorblockA{Department of Computer Engineering Technology\\ Vanier College}
 }
 
@@ -64,5 +64,17 @@ Substituting into (\ref{R given trelease}):
     R = \frac{-(10 \times 10^{-3})}{(100 \times 10^{-9}) \times (-1.204)} \approx 83 k\Omega
 \end{equation}
 An $83k\Omega$ resistor with a $100 nF$ capacitor gives a reset hold-off of approximately 10 ms,Keeping $C$ at the plotting value.
-
+\section{Applications and Limitations}
+\subsection{Application}
+A simple 25-minute electronic timer. The application works in this case because the user won't notice that the timer starts a couple of milliseconds after it is turned on, and the circuit is low-power, so there are no spikes or serious voltage drops. For this application, use the values $C = 1 uF$ and $R = 16K\Omega$, resulting in $trelease \approx 20ms$.
+\begin{equation}
+    trelease = -(16k\Omega \times 1 uF) \times -1.204 \approx 20ms
+    \label{Trelease for Application}
+\end{equation}
+\subsection{Limitations}
+The system may fail if the battery or power source runs low and does not provide the necessary power; the initial startup time may vary, affecting the quality of the reset, and the device can only be reset by turning it off and then back on. Based on the typical tolerances the capacitor would have $+/-20\%$ and the resistor would have $+/- 5\%$
+\begin{equation}
+    \frac{\delta t}{t} \approx 0.5 + 0.20 = 0.25
+\end{equation}
+True release would be around $15ms$ and $25ms$
 \end{document}
